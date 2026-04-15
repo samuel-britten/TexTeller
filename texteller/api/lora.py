@@ -73,10 +73,13 @@ def apply_lora(model, config, exclude_patterns=DEFAULT_EXCLUDE_PATTERNS):
     for target_name, target_module, param_name in _get_lora_targets(model, exclude_patterns):
         original_weight = getattr(target_module, param_name)
         out_features, in_features = original_weight.shape
+        parametrization = Lora_Parametrization(
+            out_features, in_features, config.rank, config.alpha
+        ).to(original_weight.device)
         parametrize.register_parametrization(
             target_module,
             param_name,
-            Lora_Parametrization(out_features, in_features, config.rank, config.alpha),
+            parametrization,
         )
 
 

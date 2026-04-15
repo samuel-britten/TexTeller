@@ -9,6 +9,17 @@ from .load import (
     load_textrec_model,
     load_tokenizer,
 )
+from .lora import (
+    Lora_Config,
+    apply_lora,
+    extract_lora_state_dict,
+    get_lora_parameters,
+    load_lora_state_dict,
+    lora_from_json,
+    lora_to_json,
+    remove_lora,
+    train_lora_adapter,
+)
 
 __all__ = [
     "to_katex",
@@ -21,4 +32,13 @@ __all__ = [
     "load_textrec_model",
     "load_textdet_model",
     "latex_detect",
+    "Lora_Config",
+    "apply_lora",
+    "remove_lora",
+    "get_lora_parameters",
+    "extract_lora_state_dict",
+    "load_lora_state_dict",
+    "lora_to_json",
+    "lora_from_json",
+    "train_lora_adapter",
 ]

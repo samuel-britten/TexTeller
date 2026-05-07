@@ -34,13 +34,13 @@ from texteller.utils import transform
 # doubles adapter size for little benefit on per-user fine-tuning. Callers
 # wanting exact parity with the "every linear" default used in the handwriting
 # model can pass exclude_patterns=() to override.
-DEFAULT_EXCLUDE_PATTERNS = ("lm_head",)
+DEFAULT_EXCLUDE_PATTERNS = ("lm_head", "decoder")
 
 
 @dataclass
 class Lora_Config:
     rank: int = 8
-    alpha: float = 16.0
+    alpha: float = 8.0
 
 
 class Lora_Parametrization(nn.Module):
@@ -160,10 +160,10 @@ def lora_from_json(adapter_json):
 # ---------------------------------------------------------------------------
 
 MINIMUM_SAMPLES = 20
-DEFAULT_EPOCHS = 40
-DEFAULT_LEARNING_RATE = 1e-3
-INCREMENTAL_EPOCHS = 20
-INCREMENTAL_LEARNING_RATE = 5e-4
+DEFAULT_EPOCHS = 15
+DEFAULT_LEARNING_RATE = 2e-4
+INCREMENTAL_EPOCHS = 8
+INCREMENTAL_LEARNING_RATE = 5e-5
 L2_ANCHOR_LAMBDA = 0.01
 
 
@@ -176,7 +176,10 @@ def _prepare_sample(image, label, tokenizer, device):
         return_tensors="pt",
         truncation=True,
         max_length=MAX_TOKEN_SIZE - 1,
-    ).input_ids.to(device)
+    ).input_ids
+    if token_ids[0, 0] == tokenizer.bos_token_id:
+        token_ids = token_ids[:, 1:]
+    token_ids = token_ids.to(device)
 
     labels = token_ids.clone()
     if tokenizer.pad_token_id is not None:
@@ -350,5 +353,8 @@ async def train_lora_adapter(
             break
 
     result = future.result()
+    executor.shutdown(wait=False)
+    return result
+
     executor.shutdown(wait=False)
     return result
